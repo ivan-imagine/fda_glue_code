@@ -1,0 +1,57 @@
+services:
+  # La base de datos donde ocurrirán los eventos
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: user_admin
+      POSTGRES_PASSWORD: secure_password
+      POSTGRES_DB: notifications_system
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+    networks:
+      - n8n_network
+
+  # El orquestador
+  n8n:
+    image: docker.n8n.io/n8nio/n8n
+    container_name: n8n_app
+    restart: always
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - NODE_ENV=production
+      # Configuración para que n8n use esta misma Postgres para sus propios datos
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=notifications_system
+      - DB_POSTGRESDB_USER=user_admin
+      - DB_POSTGRESDB_PASSWORD=secure_password
+    volumes:
+      - ./n8n_data:/home/node/.n8n
+    depends_on:
+      - postgres
+    networks:
+      - n8n_network
+  
+  #LAMBDA
+  processor:
+    build: ./processor
+    container_name: python_processor
+    volumes:
+      - ./processor:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8080 --reload
+    ports:
+      - "8080:8080"
+    networks:
+      - n8n_network
+
+networks:
+  n8n_network:
+    driver: bridge
