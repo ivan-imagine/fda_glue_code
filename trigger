@@ -1,3 +1,4 @@
+
 DROP TRIGGER IF EXISTS trg_n8n_trigger ON public.events;
 
 CREATE OR REPLACE FUNCTION public.notify_n8n_event()
@@ -23,9 +24,7 @@ BEGIN
   IF payload IS NULL THEN
     payload := to_jsonb(NEW);
   END IF;
-
   PERFORM pg_notify('n8n_events', payload::text);
-
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;

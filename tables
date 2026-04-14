@@ -1,0 +1,25 @@
+CREATE TABLE IF NOT EXISTS public.channels (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL
+);
+CREATE TABLE IF NOT EXISTS public.event_users (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    phone VARCHAR(20) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS public.events (
+    id SERIAL PRIMARY KEY,
+    channel_id INTEGER,
+    user_id INTEGER,
+    message TEXT,
+    created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_event_channel 
+        FOREIGN KEY (channel_id) 
+        REFERENCES public.channels(id) 
+        ON DELETE SET NULL,
+    CONSTRAINT fk_event_user 
+        FOREIGN KEY (user_id) 
+        REFERENCES public.event_users(id) 
+        ON DELETE CASCADE
+);

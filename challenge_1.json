@@ -1,0 +1,227 @@
+{
+  "name": "challenge_1",
+  "nodes": [
+    {
+      "parameters": {
+        "triggerMode": "listenTrigger",
+        "channelName": "n8n_events",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "f75f3f76-7c21-402b-a43b-5a879b710dfe",
+      "name": "Postgres Trigger",
+      "credentials": {
+        "postgres": {
+          "id": "PYxtZiMD34ghJFYv",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://processor:8080/process",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "=channel",
+              "value": "={{ $json.payload.channel }}"
+            },
+            {
+              "name": "message",
+              "value": "={{ $json.payload.data.message }}"
+            },
+            {
+              "name": "user",
+              "value": "={{ $json.payload.user }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "03b9fc8d-2cc2-4f83-903f-122e25ab4d73",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "from": "+14155238886",
+        "to": "={{ $json.phone }}",
+        "toWhatsapp": true,
+        "message": "={{ $json.formatted_message }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [
+        624,
+        -128
+      ],
+      "id": "669a944b-d53a-4503-87c2-c5d1ec4e3092",
+      "name": "Send an SMS/MMS/WhatsApp message",
+      "credentials": {
+        "twilioApi": {
+          "id": "BVpiaBmvpSvnkhZq",
+          "name": "Twilio account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.channel }}",
+                    "rightValue": 1,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    },
+                    "id": "e9af75a0-5e21-438f-8fc7-4d494f3c8400"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "310a9fda-a538-4df7-bf4e-2437ece69847",
+                    "leftValue": "={{ $json.channel }}",
+                    "rightValue": 2,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        416,
+        0
+      ],
+      "id": "665fbcb0-6165-47cc-b5ed-3f71ce7d94c7",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "#fda-test",
+          "mode": "name"
+        },
+        "text": "={{ $('HTTP Request').item.json.formatted_message }}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        656,
+        96
+      ],
+      "id": "0960a4dd-6c3a-4d87-b782-2f49bf9f9ab9",
+      "name": "Send a message",
+      "webhookId": "d892ac66-24e1-4bbe-890b-5b04216b223c",
+      "credentials": {
+        "slackApi": {
+          "id": "mIHSo7vgFXEDikGj",
+          "name": "Slack account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Postgres Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Send an SMS/MMS/WhatsApp message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "a972e3e7-9e47-4e6f-9120-4f61c07e039e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2b9f7df8d1573ed7317f01ecc98d7162ade3f0b6736db367f75d5ffd003aa57b"
+  },
+  "id": "6kNka3VEj4uSHtPA",
+  "tags": []
+}

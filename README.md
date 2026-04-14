@@ -43,12 +43,41 @@ Esto inicia los tres contenedores en la red `n8n_network`:
 | n8n        | http://localhost:5678 |
 | Processor  | http://localhost:8080 |
 
-### 2. Configurar el flujo en n8n
+### 2. Configurar la base de datos
+
+Conéctate a PostgreSQL y ejecuta los scripts SQL **uno por uno**, respetando el siguiente orden:
+
+#### Paso 1 — Crear las tablas (archivo `tables`)
+
+Ejecuta cada sentencia del archivo `tables` de forma individual y en el orden en que aparecen:
+
+1. `CREATE TABLE IF NOT EXISTS public.channels ...`
+2. `CREATE TABLE IF NOT EXISTS public.event_users ...`
+3. `CREATE TABLE IF NOT EXISTS public.events ...`
+
+> Asegúrate de que cada `CREATE TABLE` finalice correctamente antes de pasar al siguiente, ya que `events` tiene claves foráneas que dependen de `channels` y `event_users`.
+
+#### Paso 2 — Crear la función y el trigger (archivo `trigger`)
+
+Una vez que las tres tablas existan, ejecuta cada sentencia del archivo `trigger` de forma individual y en el orden en que aparecen:
+
+1. `DROP TRIGGER IF EXISTS trg_n8n_trigger ON public.events;`
+2. `CREATE OR REPLACE FUNCTION public.notify_n8n_event() ...` (toda la función hasta el `$$ LANGUAGE plpgsql;`)
+3. `CREATE TRIGGER trg_n8n_trigger ...`
+
+> No ejecutes el trigger antes de que exista la función, ni la función antes de que existan las tablas.
+
+### 3. Configurar el flujo en n8n
 
 1. Abre http://localhost:5678 en tu navegador.
-2. Crea un nuevo flujo con un trigger de PostgreSQL (o Webhook).
-3. Agrega un nodo HTTP Request que apunte a `http://processor:8080/process` con metodo POST.
-4. Mapea el payload con la estructura esperada por el procesador.
+2. Ve a **Settings → Import** y selecciona el archivo `challenge_1.json` para importar el flujo completo.
+3. Una vez importado, configura las credenciales de cada canal directamente en los nodos correspondientes:
+
+   - **WhatsApp** — ingresa el token y el número de teléfono de tu cuenta de WhatsApp Business.
+   - **Twilio** — ingresa tu `Account SID`, `Auth Token` y el número Twilio desde el que se envían los SMS.
+   - **Slack** — ingresa el `Bot Token` y el canal de destino de tu workspace.
+
+4. Activa el flujo con el toggle **Active** en la esquina superior derecha.
 
 ### 3. Endpoint del procesador
 
