@@ -73,6 +73,7 @@ Una vez que las tres tablas existan, ejecuta cada sentencia del archivo `trigger
 2. Ve a **Settings → Import** y selecciona el archivo `challenge_1.json` para importar el flujo completo.
 3. Una vez importado, configura las credenciales de cada canal directamente en los nodos correspondientes:
 
+   - **PostgreSQL** — ingresa el host (`postgres`), puerto (`5432`), nombre de base de datos (`notifications_system`), usuario y contraseña configurados en el `docker-compose.yaml`.
    - **WhatsApp** — ingresa el token y el número de teléfono de tu cuenta de WhatsApp Business.
    - **Twilio** — ingresa tu `Account SID`, `Auth Token` y el número Twilio desde el que se envían los SMS.
    - **Slack** — ingresa el `Bot Token` y el canal de destino de tu workspace.
