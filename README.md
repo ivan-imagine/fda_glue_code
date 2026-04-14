@@ -59,7 +59,8 @@ Esto inicia los tres contenedores en la red `n8n_network`:
 ```json
 {
   "channel": {
-    "id": "canal-123"
+    "id": 1,
+    "name": "whatsapp"
   },
   "user": {
     "phone": "+521234567890"
@@ -74,7 +75,7 @@ Esto inicia los tres contenedores en la red `n8n_network`:
 {
   "status": "success",
   "formatted_message": "Hola, tu pedido fue confirmado.",
-  "channel": "canal-123",
+  "channel": 1,
   "phone": "+521234567890"
 }
 ```
